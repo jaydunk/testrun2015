@@ -141,6 +141,8 @@ Analysis() {
 
 	/*PbG Resolution*/
 	TH1D *ElectroninPbG = new TH1D("ElectroninPbG", "Electron Signal in PbG", 4096, .5, 4096.5);
+	TH2D *HodX_vs_PbGElectron = new TH2D("HodX_vs_PbGElectron", "Hod X vs PbG Signal", 8, -19.2, 19.2, 4096, .5, 4096.5);
+	TH2D *HodY_vs_PbGElectron = new TH2D("HodY_vs_PbGElectron", "Hod Y vs PbG Signal", 8, -19.2, 19.2, 4096, .5, 4096.5);
 
 	int eventindex = 0;
 	int goodevents = 0;
@@ -250,6 +252,8 @@ Analysis() {
 		//PbG
 		if (ecut) {
 			ElectroninPbG->Fill(PbGADC);
+			HodX_vs_PbGElectron->Fill(xposition, PbGADC);
+			HodY_vs_PbGElectron->Fill(yposition, PbGADC);
 		}
 
 		//ECal Analysis
@@ -454,10 +458,22 @@ Analysis() {
 	TCanvas *cePbG = new TCanvas("cePbG", "Electron in PbG", 700, 500);
 	cePbG->cd();
 	LabelAxes(ElectroninPbG, "ADC", "counts");
-	TF1 *fefit = new TF1("fefit", "gaus", 200, 600);
+	TF1 *fefit = new TF1("fefit", "gaus", 400, 800);
 	ElectroninPbG->Fit(fefit, "R");
 	ElectroninPbG->Draw();
 	cePbG->Update();
+
+	TCanvas *cHodX_vs_PbGElectron = new TCanvas("cHodX_vs_PbGElectron", "Hodoscope X vs PbG Electron Signal", 1000, 800);
+	cHodX_vs_PbGElectron->cd();
+	LabelAxes(HodX_vs_PbGElectron, "X (mm)", "PbG ADC");
+	HodX_vs_PbGElectron->Draw("zcol");
+	cHodX_vs_PbGElectron->Update();
+	
+	TCanvas *cHodY_vs_PbGElectron = new TCanvas("cHodY_vs_PbGElectron", "Hodoscope Y vs PbG Electron Signal", 1000, 800);
+	cHodY_vs_PbGElectron->cd();
+	LabelAxes(HodY_vs_PbGElectron, "Y (mm)", "PbG ADC");
+	HodY_vs_PbGElectron->Draw("zcol");
+	cHodY_vs_PbGElectron->Update();
 	}
 	/**************************/
 	/***********ECAL***********/
