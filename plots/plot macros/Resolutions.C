@@ -4,14 +4,16 @@ Resolutions() {
 
 	float Ebeam[] = {2.0,3.0,4.0,6.0,8.0,12.0};
 	float Ebeam_err[] = {0.,0.,0.,0.,0.,0.};
-	float beam_spread[] = {.027,.027,,0.023,0.023,0.023};
+	float beam_spread[] = {.027,.027,0.023,0.023,0.023,0.023};
+	//float beam_spread[] = {0.,0.,0.,0.,0.,0.};
+
 
 	float ECal_mean[] = {270.5, 475.9, 586.8, 921.5, 1323., 3022.};
 	float ECal_sigma[] = {24.69, 31.54, 35.64, 47.51, 55.71, 133.};
 
 	float PbG_mean[] = {775.3, 1320., 1613., 2556., 3546., 1846.};
 	float PbG_sigma[] = {49.63, 71.96, 81., 125.3, 137., 77.99};
-
+	
 	float ECal_res[6], ECal_res_err[6];
 	float PbG_res[6], PbG_res_err[6];
 	for (int i=0; i<6; i++) {

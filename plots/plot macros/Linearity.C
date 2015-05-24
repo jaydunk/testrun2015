@@ -2,7 +2,7 @@
 
 Linearity() {
 	gStyle->SetOptFit();
-
+	
 	float Ebeam[] = {2.0,3.0,4.0,6.0,8.0};
 	float Ebeam_err[] = {0.,0.,0.,0.,0.};
 	float beam_spread[] = {0.,0.,0.,0.,0.};
