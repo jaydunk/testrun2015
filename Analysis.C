@@ -243,10 +243,10 @@ Analysis() {
 		//if(!(Sc1ADC>200)) {continue;}
 		//if(HighHodHit) {continue;}
 		//if(!(MonADC<300)) {continue;} //Monitor Cut
-		//if(!(Sc1ADC>1200)) {continue;} //Trigger counter cut
-		//if(!(yposition>-5&&yposition<5&&xposition>-5&&xposition<5)) {continue;} //include these positions
+		//if(!(Sc1ADC>700)) {continue;} //Trigger counter cut
+		//if(!(yposition>0&&xposition>-15&&xposition<-5)) {continue;} //include these positions
 		//if(!(xposition>5.0||xposition<0.0||yposition>0.0||yposition<-5.0)) {continue;} //exclude these positions
-		bool ecut = (xmult==1&&ymult==1)&&(Ce1ADC>100)&&(Ce2ADC<100);
+		bool ecut = (xmult==1&&ymult==1)&&(Ce1ADC>100);
 		/*************************************/
 		
 		//PbG
@@ -458,7 +458,7 @@ Analysis() {
 	TCanvas *cePbG = new TCanvas("cePbG", "Electron in PbG", 700, 500);
 	cePbG->cd();
 	LabelAxes(ElectroninPbG, "ADC", "counts");
-	TF1 *fefit = new TF1("fefit", "gaus", 400, 800);
+	TF1 *fefit = new TF1("fefit", "gaus", 3200, 3800);
 	ElectroninPbG->Fit(fefit, "R");
 	ElectroninPbG->Draw();
 	cePbG->Update();
