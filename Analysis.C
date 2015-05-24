@@ -20,8 +20,8 @@
 #include <string.h>
 #endif
 
-const bool ecal_plots = false;
-const bool pbg_plots = true;
+const bool ecal_plots = true;
+const bool pbg_plots = false;
 
 const int ECalNChannel = 16;
 const int HodNChannel  = 16;
@@ -458,8 +458,9 @@ Analysis() {
 	TCanvas *cePbG = new TCanvas("cePbG", "Electron in PbG", 700, 500);
 	cePbG->cd();
 	LabelAxes(ElectroninPbG, "ADC", "counts");
-	TF1 *fefit = new TF1("fefit", "gaus", 3200, 3800);
-	ElectroninPbG->Fit(fefit, "R");
+	ElectroninPbG->Rebin(8);
+	TF1 *fefit = new TF1("fefit", "gaus", 0, 4096);
+	ElectroninPbG->Fit(fefit);
 	ElectroninPbG->Draw();
 	cePbG->Update();
 
@@ -489,6 +490,7 @@ Analysis() {
 	TCanvas *cECalElectronSum = new TCanvas("cECalElectronSum", "Sum for Electrons in ECal", 700, 500);
 	cECalElectronSum->cd();
 	LabelAxes(ECalSumElectron, "ADC Sum", "counts");
+	ECalSumElectron->Rebin(8);
 	ECalSumElectron->Draw();
 	cECalElectronSum->Update();
 
