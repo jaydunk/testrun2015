@@ -127,6 +127,9 @@ Analysis() {
 	TH1D* BeamProfileY = new TH1D("BeamProfileY", "Beam Profile Y", 8, -19.2, 19.2);
 	TH2D* BeamXY = new TH2D("BeamXY", "Beam Profile XY", 8, -19.2, 19.2, 8, -19.2, 19.2);
 		
+	TH1D *ConsecPulser = new TH1D("ConsecPulser", "Consecutive pulser events", 101, -0.5, 100.5);
+	TH1D *NonPulserCounter = new TH1D("NonPulserCounter", "Nonpulser events counter", 101, -0.5, 100.5);
+
 	/*ECal histograms*/
 	TH1D *ECalSumHist = new TH1D("ECalSumHist", "ECal Tower Sum", 6000, .5, 6000.5);
 	TH1D *ECalSumElectron = new TH1D("ECalSumElectron", "ECal Electron Sum", 6000, .5, 6000.5);
@@ -138,6 +141,10 @@ Analysis() {
 	TH1D *ECalLocY = new TH1D("ECalLocY", "ECal Loc Y", 200, -30.0, 30.0);
 	TH2D *ECalLocX_vs_Sum = new TH2D("ECalLocX_vs_Sum", "ECal Loc X vs Sum", 100, -15.0, 15.0, 6000, .5, 6000.5);
 	TH2D *ECalLocY_vs_Sum = new TH2D("ECalLocY_vs_Sum", "ECal Loc Y vs Sum", 100, -15.0, 15.0, 6000, .5, 6000.5);
+	TH2D *Spill_vs_ECalSum = new TH2D("Spill_vs_ECalSum", "Spill number vs ECal Sum", 30, .5, 30.5, 6000, .5, 6000.5);
+	TH1D *ECalSumSingleSpill = new TH1D("ECalSumSingleSpill", "Temporary Histogram", 6000, .5, 6000.5);
+	TH1D *MeanValuePerSpill = new TH1D("MeanValuePerSpill", "Spill dependence of mean value", 30, 0.5, 30.5);
+	TH1D *SigmaValuePerSpill = new TH1D("SigmaValuePerSpill", "Spill dependence of sigma value", 30, 0.5, 30.5);
 
 	/*PbG Resolution*/
 	TH1D *ElectroninPbG = new TH1D("ElectroninPbG", "Electron Signal in PbG", 4096, .5, 4096.5);
@@ -181,6 +188,9 @@ Analysis() {
 	chain->SetBranchAddress("Ce2RawADC", &Ce2ADC);
 	chain->SetBranchAddress("PbGRawADC", &PbGADC);
 	
+	int consec_pulser_events = 0, nonpulser_events_counter = 0;
+	int spill = 1;
+
 	for(eventindex=0; eventindex<nentries; eventindex++) {	
 
 		chain->GetEntry(eventindex);
@@ -225,6 +235,29 @@ Analysis() {
 		XMult->Fill(xmult);
 		YMult->Fill(ymult);
 		
+		if (Sc1ADC<130 && xmult==0 && ymult==0) {
+			NonPulserCounter->Fill(nonpulser_events_counter);
+			consec_pulser_events++;
+		}
+		else {
+			ConsecPulser->Fill(consec_pulser_events);
+			consec_pulser_events = 0;
+			nonpulser_events_counter++;
+		}
+
+		if (consec_pulser_events >= 10) nonpulser_events_counter = 0;
+		if (nonpulser_events_counter == 50) {
+			TF1 *ftemp = new TF1("ftemp", "gaus", 700, 1300);
+			ECalSumSingleSpill->Fit(ftemp, "NR");
+			MeanValuePerSpill->SetBinContent(spill, ftemp->GetParameter(1));
+			MeanValuePerSpill->SetBinError(spill, ftemp->GetParError(1));
+			SigmaValuePerSpill->SetBinContent(spill, ftemp->GetParameter(2));
+			SigmaValuePerSpill->SetBinError(spill, ftemp->GetParError(2));
+			ECalSumSingleSpill->Reset();
+			delete ftemp;
+			spill++;
+			cout <<"spill++"<<endl;
+		}//threshold value for new spill
 		 
 		float ECalPedestalSubtracted;
 		for(int i=0; i<ECalNChannel; i++) {
@@ -311,6 +344,7 @@ Analysis() {
 
 		if (ecut) {
 			ECalSumElectron->Fill(ECalSum);
+			ECalSumSingleSpill->Fill(ECalSum);
 			ECalMultiplicityElectron->Fill(ECalMultiplicity);	
 			HodX_vs_ECalSumElectron->Fill(xposition, ECalSum);
 			HodY_vs_ECalSumElectron->Fill(yposition, ECalSum);
@@ -318,6 +352,7 @@ Analysis() {
 			ECalLocY->Fill(ECalYloc);
 			ECalLocX_vs_Sum->Fill(ECalXloc, ECalSum);
 			ECalLocY_vs_Sum->Fill(ECalYloc, ECalSum);
+			Spill_vs_ECalSum->Fill(spill, ECalSum);
 		}
 
 		//Hodoscope
@@ -452,6 +487,20 @@ Analysis() {
 	cy->Update();
 	
 	/**************************/
+	/**********Pulser**********/
+	/**************************/
+
+	TCanvas *cPulser = new TCanvas("cPulser", "Consecutive Pulser Events", 900, 700);
+	cPulser->cd();
+	ConsecPulser->Draw();
+	cPulser->Update();
+
+	TCanvas *cNonPulserCounter = new TCanvas("cNonPulserCounter", "Nonpulser Counter", 900, 700);
+	cNonPulserCounter->cd();
+	NonPulserCounter->Draw();
+	cNonPulserCounter->Update();
+
+	/**************************/
 	/********Lead Glass********/
 	/**************************/
 	if (pbg_plots) {
@@ -473,7 +522,7 @@ Analysis() {
 	TCanvas *cHodY_vs_PbGElectron = new TCanvas("cHodY_vs_PbGElectron", "Hodoscope Y vs PbG Electron Signal", 1000, 800);
 	cHodY_vs_PbGElectron->cd();
 	LabelAxes(HodY_vs_PbGElectron, "Y (mm)", "PbG ADC");
-	HodY_vs_PbGElectron->Draw("zcol");
+	HodY_vs_PbGElectron->Draw("cont");
 	cHodY_vs_PbGElectron->Update();
 	}
 	/**************************/
@@ -487,10 +536,13 @@ Analysis() {
 	ECalSumHist->Draw();
 	cECalSum->Update();
 	
+	TF1 *fsumfit2 = new TF1("fsumfit", "gaus", 950, 1250);
+	fsumfit->SetLineColor(kBlue+2);
 	TCanvas *cECalElectronSum = new TCanvas("cECalElectronSum", "Sum for Electrons in ECal", 700, 500);
 	cECalElectronSum->cd();
 	LabelAxes(ECalSumElectron, "ADC Sum", "counts");
 	ECalSumElectron->Rebin(8);
+	ECalSumElectron->Fit(fsumfit, "R");
 	ECalSumElectron->Draw();
 	cECalElectronSum->Update();
 
@@ -509,13 +561,13 @@ Analysis() {
 	TCanvas *cHodX_vs_ECalElectron = new TCanvas("cHodX_vs_ECalElectron", "Hodoscope X vs Electron Signal", 1000, 800);
 	cHodX_vs_ECalElectron->cd();
 	LabelAxes(HodX_vs_ECalSumElectron, "X (mm)", "ECal ADC Sum");
-	HodX_vs_ECalSumElectron->Draw("zcol");
+	HodX_vs_ECalSumElectron->Draw("cont");
 	cHodX_vs_ECalElectron->Update();
 	
 	TCanvas *cHodY_vs_ECalElectron = new TCanvas("cHodY_vs_ECalElectron", "Hodoscope Y vs Electron Signal", 1000, 800);
 	cHodY_vs_ECalElectron->cd();
 	LabelAxes(HodY_vs_ECalSumElectron, "Y (mm)", "ECal ADC Sum");
-	HodY_vs_ECalSumElectron->Draw("zcol");
+	HodY_vs_ECalSumElectron->Draw("cont");
 	cHodY_vs_ECalElectron->Update();
 	}
 	/**************************/
@@ -538,13 +590,13 @@ Analysis() {
 	TCanvas *cECalLocX_vs_Sum = new TCanvas("cECalLocX_vs_Sum", "ECal Loc X vs ECal Sum", 900, 700);
 	cECalLocX_vs_Sum->cd();
 	LabelAxes(ECalLocX_vs_Sum, "Loc X", "ECalSum");
-	ECalLocX_vs_Sum->Draw("zcol");
+	ECalLocX_vs_Sum->Draw("cont");
 	cECalLocX_vs_Sum->Update();
 	
 	TCanvas *cECalLocY_vs_Sum = new TCanvas("cECalLocY_vs_Sum", "ECal Loc Y vs ECal Sum", 900, 700);
 	cECalLocY_vs_Sum->cd();
 	LabelAxes(ECalLocY_vs_Sum, "Loc Y", "ECalSum");
-	ECalLocY_vs_Sum->Draw("zcol");
+	ECalLocY_vs_Sum->Draw("cont");
 	cECalLocY_vs_Sum->Update();
 	
 	//Profile fits for corrections
@@ -563,6 +615,26 @@ Analysis() {
 	LocY_Sum_Profile->Draw();
 	LocY_Sum_Profile->Fit(fquady, "R");
 	cECalLoc_Profiles->Update();
+
+	TCanvas *cSpillECal = new TCanvas("cSpillECal", "Spill number vs ECal", 900, 700);
+	cSpillECal->cd();
+	LabelAxes(Spill_vs_ECalSum, "Spill", "ECal Sum");
+	Spill_vs_ECalSum->Draw("cont");
+	cSpillECal->Update();
+
+	TCanvas *cMeanSpill = new TCanvas("cMeanSpill", "Mean per spill", 900, 700);
+	cMeanSpill->cd();
+	LabelAxes(MeanValuePerSpill, "Spill", "mean");
+	MeanValuePerSpill->SetMarkerStyle(20);
+	MeanValuePerSpill->Draw();
+	cMeanSpill->Update();
+
+	TCanvas *cSigmaSpill = new TCanvas("cSigmaSpill", "Sigma per spill", 900, 700);
+	cSigmaSpill->cd();
+	LabelAxes(SigmaValuePerSpill, "Spill", "sigma");
+	SigmaValuePerSpill->SetMarkerStyle(20);
+	SigmaValuePerSpill->Draw();
+	cSigmaSpill->Update();
 	}
 }
 
