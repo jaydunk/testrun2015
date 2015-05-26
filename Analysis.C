@@ -145,6 +145,8 @@ Analysis() {
 	TH1D *ECalSumSingleSpill = new TH1D("ECalSumSingleSpill", "Temporary Histogram", 6000, .5, 6000.5);
 	TH1D *MeanValuePerSpill = new TH1D("MeanValuePerSpill", "Spill dependence of mean value", 30, 0.5, 30.5);
 	TH1D *SigmaValuePerSpill = new TH1D("SigmaValuePerSpill", "Spill dependence of sigma value", 30, 0.5, 30.5);
+	TH2D *CalX_HodX = new TH2D("CalX_HodX", "Cal X vs Hod X", 100.0, 0.0, 100.0, 8, -19.2, 19.2);
+	TH2D *CalY_HodY = new TH2D("CalY_HodY", "Cal Y vs Hod Y", 100.0, 0.0, 100.0, 8, -19.2, 19.2);
 
 	/*PbG Resolution*/
 	TH1D *ElectroninPbG = new TH1D("ElectroninPbG", "Electron Signal in PbG", 4096, .5, 4096.5);
@@ -353,6 +355,8 @@ Analysis() {
 			ECalLocX_vs_Sum->Fill(ECalXloc, ECalSum);
 			ECalLocY_vs_Sum->Fill(ECalYloc, ECalSum);
 			Spill_vs_ECalSum->Fill(spill, ECalSum);
+			CalX_HodX->Fill(25.*iEx+ECalXloc, xposition);
+			CalY_HodY->Fill(100. - (25.*iEy+ECalYloc), yposition);
 		}
 
 		//Hodoscope
@@ -575,6 +579,16 @@ Analysis() {
 	/**************************/
 
 	if (ecal_plots) {
+	TCanvas *cLocXHodX = new TCanvas("cLocXHodX", "LocX vs HodX", 900, 700); 
+	cLocXHodX->cd()
+	CalX_HodX->Draw("cont");
+	cLocXHodX->Update();
+
+	TCanvas *cLocYHodY = new TCanvas("cLocYHodY", "LocY vs HodY", 900, 700); 
+	cLocYHodY->cd()
+	CalY_HodY->Draw("cont");
+	cLocYHodY->Update();
+
 	TCanvas *cECalLocX = new TCanvas("cECalLocX", "ECal Loc X", 700, 500);
 	cECalLocX->cd();
 	LabelAxes(ECalLocX, "Loc X", "counts");
