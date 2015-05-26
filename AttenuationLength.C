@@ -263,6 +263,7 @@ AttenuationLength() {
 
 	TCanvas *cAttLength = new TCanvas("cAttLength", "Attenuation in Fibers", 900, 700);
 	cAttLength->cd();
+	AttLength->Fit("expo");
 	AttLength->Draw("][");
 	cAttLength->Update();
 }
