@@ -20,8 +20,8 @@
 #include <string.h>
 #endif
 
-const bool ecal_plots = true;
-const bool pbg_plots = false;
+const bool ecal_plots = false;
+const bool pbg_plots = true;
 
 const int ECalNChannel = 16;
 const int HodNChannel  = 16;
@@ -279,8 +279,8 @@ Analysis() {
 		//if(HighHodHit) {continue;}
 		//if(!(MonADC<300)) {continue;} //Monitor Cut
 		//if(!(Sc1ADC>700)) {continue;} //Trigger counter cut
-		//if(!(yposition>0&&xposition>-15&&xposition<-5)) {continue;} //include these positions
-		//if(!(xposition>5.0||xposition<0.0||yposition>0.0||yposition<-5.0)) {continue;} //exclude these positions
+		//if(!(yposition>-5&&yposition<5&&xposition>-5&&xposition<5)) {continue;} //include these positions
+		//if(!(xposition>-5.0||xposition<5.0||yposition>-5.0||yposition<5.0)) {continue;} //exclude these positions
 		bool ecut = (xmult==1&&ymult==1)&&(Ce1ADC>100);
 		/*************************************/
 		
@@ -344,7 +344,14 @@ Analysis() {
 			iEy = maxCh/4;
 		}
 
-		if (ecut) {
+		//Correct ECalSum
+		ECalSumCorrected = ECalSum*(1.0 + .000249*ECalXloc*ECalXloc + .000817*ECalYloc*ECalYloc);
+		ECalSum = ECalSumCorrected;
+
+		bool ECal_Loc_r_cut = sqrt(ECalXloc*ECalXloc + ECalYloc*ECalYloc) < 7;
+		bool central_tower = iEl==5||iEl==6||iEl==9||iEl==10;
+
+		if (ecut&&ECal_Loc_r_cut&&central_tower) {
 			ECalSumElectron->Fill(ECalSum);
 			ECalSumSingleSpill->Fill(ECalSum);
 			ECalMultiplicityElectron->Fill(ECalMultiplicity);	
@@ -540,9 +547,9 @@ Analysis() {
 	ECalSumHist->Draw();
 	cECalSum->Update();
 	
-	TF1 *fsumfit2 = new TF1("fsumfit", "gaus", 950, 1250);
+	TF1 *fsumfit2 = new TF1("fsumfit", "gaus", 250, 550);
 	fsumfit->SetLineColor(kBlue+2);
-	TCanvas *cECalElectronSum = new TCanvas("cECalElectronSum", "Sum for Electrons in ECal", 700, 500);
+	TCanvas *cECalElectronSum = new TCanvas("cECalElectronSum", "Sum for Electrons in ECal", 900, 700);
 	cECalElectronSum->cd();
 	LabelAxes(ECalSumElectron, "ADC Sum", "counts");
 	ECalSumElectron->Rebin(8);

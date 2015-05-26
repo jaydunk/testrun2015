@@ -217,8 +217,7 @@ void ComputeOneFile(char* file, TH1D *AttLength, int offset) {
 
 		
 		if (ecut) {
-			//HodX_vs_ECalSumElectron->Fill(xposition, ECalSum);
-			HodX_vs_ECalSumElectron->Fill(xposition, ECalHitsAbovePed[6]);
+			HodX_vs_ECalSumElectron->Fill(xposition, ECalSum);
 		}
 
 		goodevents++;
@@ -241,7 +240,7 @@ void ComputeOneFile(char* file, TH1D *AttLength, int offset) {
 	cHodDependence->Divide(4,2);
 	for (int i=0; i<8; i++) {
 		cHodDependence->cd(i+1);
-		fit_hod_bin[i] = new TF1(Form("fit_hod_bin_%d", i), "gaus", 600, 1000);
+		fit_hod_bin[i] = new TF1(Form("fit_hod_bin_%d", i), "gaus", 2300, 4200);
 		HodXProjections[i]->Rebin(60);
 		HodXProjections[i]->Fit(fit_hod_bin[i], "R");
 		HodXProjections[i]->Draw();
@@ -265,8 +264,11 @@ AttenuationLength() {
 	TCanvas *cAttLength = new TCanvas("cAttLength", "Attenuation in Fibers", 900, 700);
 	cAttLength->cd();
 	AttLength->Fit("expo");
-	cout << "att length: " << -1.0/AttLength->GetFunction("expo")->GetParameter(1) << endl;
-	cout << "att length error: " << AttLength->GetFunction("expo")->GetParError(1) << endl;
+	double attl = -1.0/AttLength->GetFunction("expo")->GetParameter(1);
+	double attl_err = attl*attl*(AttLength->GetFunction("expo")->GetParError(1));
+	cout << "att length: " << attl << endl;
+	cout << "att length error: " << attl_err << endl;
+	LabelAxes(AttLength, "Distance from photodetector (cm)", "Detector Response");
 	AttLength->Draw("][");
 	cAttLength->Update();
 }
