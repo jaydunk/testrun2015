@@ -580,12 +580,12 @@ Analysis() {
 
 	if (ecal_plots) {
 	TCanvas *cLocXHodX = new TCanvas("cLocXHodX", "LocX vs HodX", 900, 700); 
-	cLocXHodX->cd()
+	cLocXHodX->cd();
 	CalX_HodX->Draw("cont");
 	cLocXHodX->Update();
 
 	TCanvas *cLocYHodY = new TCanvas("cLocYHodY", "LocY vs HodY", 900, 700); 
-	cLocYHodY->cd()
+	cLocYHodY->cd();
 	CalY_HodY->Draw("cont");
 	cLocYHodY->Update();
 

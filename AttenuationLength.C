@@ -217,7 +217,8 @@ void ComputeOneFile(char* file, TH1D *AttLength, int offset) {
 
 		
 		if (ecut) {
-			HodX_vs_ECalSumElectron->Fill(xposition, ECalSum);
+			//HodX_vs_ECalSumElectron->Fill(xposition, ECalSum);
+			HodX_vs_ECalSumElectron->Fill(xposition, ECalHitsAbovePed[6]);
 		}
 
 		goodevents++;
@@ -240,8 +241,8 @@ void ComputeOneFile(char* file, TH1D *AttLength, int offset) {
 	cHodDependence->Divide(4,2);
 	for (int i=0; i<8; i++) {
 		cHodDependence->cd(i+1);
-		fit_hod_bin[i] = new TF1(Form("fit_hod_bin_%d", i), "gaus", 2300, 4200);
-		HodXProjections[i]->Rebin(64);
+		fit_hod_bin[i] = new TF1(Form("fit_hod_bin_%d", i), "gaus", 600, 1000);
+		HodXProjections[i]->Rebin(60);
 		HodXProjections[i]->Fit(fit_hod_bin[i], "R");
 		HodXProjections[i]->Draw();
 		AttLength->SetBinContent(offset+(i+1), fit_hod_bin[i]->GetParameter(1));
@@ -256,7 +257,7 @@ void ComputeOneFile(char* file, TH1D *AttLength, int offset) {
 
 AttenuationLength() {
 
-	TH1D *AttLength = new TH1D("AttLength", "Attenuation Length", 24, 0.5, 24.5);
+	TH1D *AttLength = new TH1D("AttLength", "Attenuation Length", 24, 0.0, .5*24.5);
 	ComputeOneFile("/Users/jaydunkelberger/testrun2015/data/2015_5_25/data50.txt.root", AttLength, 0);
 	ComputeOneFile("/Users/jaydunkelberger/testrun2015/data/2015_5_25/data49.txt.root", AttLength, 8);
 	ComputeOneFile("/Users/jaydunkelberger/testrun2015/data/2015_5_25/data51.txt.root", AttLength, 16);
@@ -264,6 +265,8 @@ AttenuationLength() {
 	TCanvas *cAttLength = new TCanvas("cAttLength", "Attenuation in Fibers", 900, 700);
 	cAttLength->cd();
 	AttLength->Fit("expo");
+	cout << "att length: " << -1.0/AttLength->GetFunction("expo")->GetParameter(1) << endl;
+	cout << "att length error: " << AttLength->GetFunction("expo")->GetParError(1) << endl;
 	AttLength->Draw("][");
 	cAttLength->Update();
 }
