@@ -1,5 +1,9 @@
 /*Ecal and PbGlass resolution*/
 
+double div_err(double da, double a, double db, double b) {
+	return sqrt((da*da)/(a*a) + (db*db)/(b*b));
+}
+
 Resolutions() {
 
 	float Ebeam[] = {2.0,3.0,4.0,6.0,8.0,12.0};
@@ -19,6 +23,8 @@ Resolutions() {
 	
 	float OldPbG_mean[] = {601.5, 1105, 1622, 2074, 2901};
 	float OldPbG_sigma[] = {25.07, 38.05, 49.33, 58.2, 77.18};
+	float OldPbG_mean_err[] = {.8, .6, .8, .7, 1.1};
+	float OldPbG_sigma_err[] = {.83, .53, .74, .6, .93};
 
 	float ECal_res[6], ECal_res_err[6];
 	float PbG_res[6], PbG_res_err[6];
@@ -59,7 +65,7 @@ Resolutions() {
 	gPbGRes->SetMarkerSize(2.0);
 	gPbGRes->SetMarkerColor(kRed+1);
 	gPbGRes->SetLineColor(kRed+1);
-	gOldPbGRes->SetMarkerStyle(21);
+	gOldPbGRes->SetMarkerStyle(22);
 	gOldPbGRes->SetMarkerSize(2.0);
 	gOldPbGRes->SetMarkerColor(kMagenta+1);
 	gOldPbGRes->SetLineColor(kMagenta+1);

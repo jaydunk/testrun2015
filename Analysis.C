@@ -20,8 +20,8 @@
 #include <string.h>
 #endif
 
-const bool ecal_plots = false;
-const bool pbg_plots = true;
+const bool ecal_plots = true;
+const bool pbg_plots = false;
 
 const int ECalNChannel = 16;
 const int HodNChannel  = 16;
@@ -345,8 +345,8 @@ Analysis() {
 		}
 
 		//Correct ECalSum
-		ECalSumCorrected = ECalSum*(1.0 + .000249*ECalXloc*ECalXloc + .000817*ECalYloc*ECalYloc);
-		ECalSum = ECalSumCorrected;
+		//ECalSumCorrected = ECalSum*(1.0 + .000249*ECalXloc*ECalXloc + .000817*ECalYloc*ECalYloc);
+		//ECalSum = ECalSumCorrected;
 
 		bool ECal_Loc_r_cut = sqrt(ECalXloc*ECalXloc + ECalYloc*ECalYloc) < 7;
 		bool central_tower = iEl==5||iEl==6||iEl==9||iEl==10;

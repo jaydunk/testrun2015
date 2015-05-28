@@ -205,6 +205,7 @@ void ComputeOneFile(char* file, TH1D *AttLength, int offset) {
 		//if(!(yposition>0&&xposition>-15&&xposition<-5)) {continue;} //include these positions
 		//if(!(xposition>5.0||xposition<0.0||yposition>0.0||yposition<-5.0)) {continue;} //exclude these positions
 		bool ecut = (xmult==1&&ymult==1)&&(Ce1ADC>100);
+		bool mipcut = (xmult==1&&ymult==1)&&(Ce1ADC<100);
 		/*************************************/
 		
 		//ECal Analysis
@@ -216,7 +217,7 @@ void ComputeOneFile(char* file, TH1D *AttLength, int offset) {
 		}
 
 		
-		if (ecut) {
+		if (mipcut) {
 			HodX_vs_ECalSumElectron->Fill(xposition, ECalSum);
 		}
 
@@ -240,8 +241,8 @@ void ComputeOneFile(char* file, TH1D *AttLength, int offset) {
 	cHodDependence->Divide(4,2);
 	for (int i=0; i<8; i++) {
 		cHodDependence->cd(i+1);
-		fit_hod_bin[i] = new TF1(Form("fit_hod_bin_%d", i), "gaus", 2300, 4200);
-		HodXProjections[i]->Rebin(60);
+		fit_hod_bin[i] = new TF1(Form("fit_hod_bin_%d", i), "gaus", 50, 250);
+		HodXProjections[i]->Rebin(30);
 		HodXProjections[i]->Fit(fit_hod_bin[i], "R");
 		HodXProjections[i]->Draw();
 		AttLength->SetBinContent(offset+(i+1), fit_hod_bin[i]->GetParameter(1));
